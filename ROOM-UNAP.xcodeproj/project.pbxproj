@@ -6,13 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+
 /* Begin PBXBuildFile section */
 		D1D285AB301880CD0043E674 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = D1D285AA301880CD0043E674 /* Supabase */; };
 /* End PBXBuildFile section */
 
+
 /* Begin PBXFileReference section */
 		A78B348E301305DC008121C5 /* ROOM-UNAP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ROOM-UNAP.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		D1D130123018947400021976 /* Exceptions for "ROOM-UNAP" folder in "ROOM-UNAP" target */ = {
@@ -24,6 +27,7 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A78B3490301305DC008121C5 /* ROOM-UNAP */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -34,6 +38,7 @@
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
+
 
 /* Begin PBXFrameworksBuildPhase section */
 		A78B348B301305DC008121C5 /* Frameworks */ = {
@@ -51,7 +56,6 @@
 			isa = PBXGroup;
 			children = (
 				A78B3490301305DC008121C5 /* ROOM-UNAP */,
-				D1D285A9301880CD0043E674 /* Frameworks */,
 				A78B348F301305DC008121C5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,13 +66,6 @@
 				A78B348E301305DC008121C5 /* ROOM-UNAP.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		D1D285A9301880CD0043E674 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -91,7 +88,6 @@
 			);
 			name = "ROOM-UNAP";
 			packageProductDependencies = (
-				D1D285AA301880CD0043E674 /* Supabase */,
 			);
 			productName = "ROOM-UNAP";
 			productReference = A78B348E301305DC008121C5 /* ROOM-UNAP.app */;
@@ -121,9 +117,6 @@
 			);
 			mainGroup = A78B3485301305DC008121C5;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				D1D285A830187F8F0043E674 /* XCRemoteSwiftPackageReference "supabase-swift" */,
-			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A78B348F301305DC008121C5 /* Products */;
 			projectDirPath = "";
@@ -278,13 +271,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y3Q4W2SH64;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "ROOM-UNAP/Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -300,7 +291,6 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "UNAP.ROOM-UNAP.mishael";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -323,13 +313,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y3Q4W2SH64;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "ROOM-UNAP/Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -345,7 +333,6 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "UNAP.ROOM-UNAP.mishael";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -402,6 +389,7 @@
 			productName = Supabase;
 		};
 /* End XCSwiftPackageProductDependency section */
+
 	};
 	rootObject = A78B3486301305DC008121C5 /* Project object */;
 }
