@@ -2,23 +2,25 @@
 //  ContentView.swift
 //  ROOM-UNAP
 //
-//  Created by Erick on 23/07/26.
-//
 
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject private var authViewModel: AuthViewModel
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Group {
+            if authViewModel.isAuthenticated {
+                MainTabView()
+            } else {
+                AuthRootView()
+            }
         }
-        .padding()
+        .animation(.easeInOut(duration: 0.25), value: authViewModel.isAuthenticated)
     }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(AuthViewModel())
 }
