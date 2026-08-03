@@ -10,6 +10,7 @@ struct AuthRootView: View {
 
 struct LoginView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
+    @AppStorage("preferredInteractionAccent") private var preferredInteractionAccent = InteractionAccent.blue.rawValue
     @State private var email = ""
     @State private var password = ""
 
@@ -47,8 +48,10 @@ struct LoginView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
+                    .foregroundStyle(.white)
+                    .background(interactionAccent.tintColor, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(RoomUnapPressableButtonStyle(accentColor: interactionAccent.tintColor, cornerRadius: 16))
                 .disabled(authViewModel.isLoading || email.isEmpty || password.isEmpty)
 
                 GoogleSignInButton(isLoading: authViewModel.isLoading) {
@@ -77,10 +80,15 @@ struct LoginView: View {
             set: { if !$0 { authViewModel.errorMessage = nil } }
         )
     }
+
+    private var interactionAccent: InteractionAccent {
+        InteractionAccent(rawValue: preferredInteractionAccent) ?? .blue
+    }
 }
 
 struct RegisterView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
+    @AppStorage("preferredInteractionAccent") private var preferredInteractionAccent = InteractionAccent.blue.rawValue
     @State private var fullName = ""
     @State private var email = ""
     @State private var password = ""
@@ -135,7 +143,11 @@ struct RegisterView: View {
                             .fontWeight(.semibold)
                         Spacer()
                     }
+                    .frame(height: 50)
+                    .foregroundStyle(.white)
+                    .background(interactionAccent.tintColor, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
+                .buttonStyle(RoomUnapPressableButtonStyle(accentColor: interactionAccent.tintColor, cornerRadius: 16))
                 .disabled(authViewModel.isLoading || fullName.isEmpty || email.isEmpty || password.isEmpty)
             }
 
@@ -159,21 +171,22 @@ struct RegisterView: View {
             set: { if !$0 { authViewModel.errorMessage = nil } }
         )
     }
+
+    private var interactionAccent: InteractionAccent {
+        InteractionAccent(rawValue: preferredInteractionAccent) ?? .blue
+    }
 }
 
 private struct GoogleSignInButton: View {
     let isLoading: Bool
     let action: () -> Void
+    @AppStorage("preferredInteractionAccent") private var preferredInteractionAccent = InteractionAccent.blue.rawValue
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Text("G")
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .foregroundStyle(.blue)
-                    .frame(width: 24, height: 24)
-                    .background(.white, in: Circle())
-                    .overlay(Circle().stroke(Color.black.opacity(0.08), lineWidth: 1))
+                GoogleLogoMark()
+                    .frame(width: 20, height: 20)
 
                 Text("Continuar con Google")
                     .fontWeight(.semibold)
@@ -187,7 +200,43 @@ private struct GoogleSignInButton: View {
                     .stroke(Color(.separator), lineWidth: 1)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(RoomUnapPressableButtonStyle(accentColor: interactionAccent.tintColor, cornerRadius: 8))
         .disabled(isLoading)
+    }
+
+    private var interactionAccent: InteractionAccent {
+        InteractionAccent(rawValue: preferredInteractionAccent) ?? .blue
+    }
+}
+
+private struct GoogleLogoMark: View {
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(.white)
+                .overlay(
+                    Circle()
+                        .strokeBorder(
+                            AngularGradient(
+                                colors: [
+                                    Color(red: 0.91, green: 0.30, blue: 0.24),
+                                    Color(red: 0.96, green: 0.77, blue: 0.21),
+                                    Color(red: 0.20, green: 0.58, blue: 0.86),
+                                    Color(red: 0.21, green: 0.72, blue: 0.35),
+                                    Color(red: 0.91, green: 0.30, blue: 0.24)
+                                ],
+                                center: .center
+                            ),
+                            lineWidth: 3.2
+                        )
+                )
+
+            Rectangle()
+                .fill(Color(red: 0.20, green: 0.58, blue: 0.86))
+                .frame(width: 7, height: 3.6)
+                .offset(x: 4.5, y: 0.5)
+        }
+        .clipShape(Circle())
+        .shadow(color: .black.opacity(0.06), radius: 2, x: 0, y: 1)
     }
 }

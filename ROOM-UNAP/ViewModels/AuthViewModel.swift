@@ -1,4 +1,5 @@
 import Foundation
+import AuthenticationServices
 import Combine
 import Supabase
 #if canImport(UIKit)
@@ -15,6 +16,7 @@ final class AuthViewModel: ObservableObject {
 
     private let client: SupabaseClient
     private let service: RoomUnapService
+    private let webAuthenticationSession = OAuthWebAuthenticationSession()
     private var authTask: Task<Void, Never>?
 
     init(
@@ -54,12 +56,22 @@ final class AuthViewModel: ObservableObject {
 
     func signInWithGoogle() async {
         await runAuthAction {
-            let redirectURL = URL(string: "roomunap://login-callback")!
-            let url = try self.client.auth.getOAuthSignInURL(
+            let session = try await self.client.auth.signInWithOAuth(
                 provider: .google,
-                redirectTo: redirectURL
-            )
-            try await self.openOAuthURL(url)
+                redirectTo: URL(string: "roomunap://login-callback"),
+                queryParams: [
+                    (name: "prompt", value: "select_account")
+                ]
+            ) { url in
+                try await self.webAuthenticationSession.authenticate(
+                    url: url,
+                    callbackURLScheme: "roomunap",
+                    prefersEphemeralWebBrowserSession: true
+                )
+            }
+            self.session = session
+            self.isAuthenticated = true
+            await self.loadProfile(userId: session.user.id.uuidString)
         }
     }
 
@@ -125,15 +137,67 @@ final class AuthViewModel: ObservableObject {
         isLoading = false
     }
 
-    private func openOAuthURL(_ url: URL) async throws {
-        #if canImport(UIKit)
-        let opened = await UIApplication.shared.open(url)
-        guard opened else {
-            throw AppError.custom("No se pudo abrir Google. Prueba en un simulador o dispositivo real, no en Preview.")
+}
+
+private enum OAuthPresentationError: LocalizedError {
+    case alreadyInProgress
+    case couldNotStart
+
+    var errorDescription: String? {
+        switch self {
+        case .alreadyInProgress:
+            return "Ya hay un inicio de sesion con Google en curso."
+        case .couldNotStart:
+            return "No se pudo abrir Google. Prueba en un simulador o dispositivo real, no en Preview."
         }
-        #else
-        throw AppError.custom("Google Sign-In solo esta disponible en iOS.")
+    }
+}
+
+@MainActor
+private final class OAuthWebAuthenticationSession: NSObject, ASWebAuthenticationPresentationContextProviding {
+    private var activeSession: ASWebAuthenticationSession?
+
+    func authenticate(url: URL, callbackURLScheme: String, prefersEphemeralWebBrowserSession: Bool) async throws -> URL {
+        guard activeSession == nil else { throw OAuthPresentationError.alreadyInProgress }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            let session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme) { [weak self] callbackURL, error in
+                Task { @MainActor in
+                    self?.activeSession = nil
+
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else if let callbackURL {
+                        continuation.resume(returning: callbackURL)
+                    } else {
+                        continuation.resume(throwing: OAuthPresentationError.couldNotStart)
+                    }
+                }
+            }
+
+            session.presentationContextProvider = self
+            session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
+            activeSession = session
+
+            if !session.start() {
+                activeSession = nil
+                continuation.resume(throwing: OAuthPresentationError.couldNotStart)
+            }
+        }
+    }
+
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        #if canImport(UIKit)
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        if let window = scenes.flatMap(\.windows).first(where: \.isKeyWindow) {
+            return window
+        }
+        if let scene = scenes.first {
+            return ASPresentationAnchor(windowScene: scene)
+        }
         #endif
+
+        return ASPresentationAnchor()
     }
 }
 

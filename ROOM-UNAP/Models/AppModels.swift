@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum UserRole: String, Codable, CaseIterable, Identifiable {
     case estudiante
@@ -17,6 +18,94 @@ enum UserRole: String, Codable, CaseIterable, Identifiable {
             return "Super admin"
         }
     }
+
+    var canAccessAdminDashboard: Bool {
+        self == .arrendador || self == .superAdmin
+    }
+
+    var canEditListings: Bool {
+        canAccessAdminDashboard
+    }
+
+    var canManageUserRoles: Bool {
+        self == .superAdmin
+    }
+
+    var availableRoleOptions: [UserRole] {
+        switch self {
+        case .superAdmin:
+            return [.estudiante, .arrendador, .superAdmin]
+        case .arrendador:
+            return [.estudiante]
+        case .estudiante:
+            return [.estudiante]
+        }
+    }
+}
+
+enum InterfaceTone: String, CaseIterable, Identifiable {
+    case black
+    case white
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .black:
+            return "Negro"
+        case .white:
+            return "Blanco"
+        }
+    }
+
+    var tintColor: Color {
+        switch self {
+        case .black:
+            return .black
+        case .white:
+            return .white
+        }
+    }
+}
+
+enum InteractionAccent: String, CaseIterable, Identifiable {
+    case blue
+    case teal
+    case emerald
+    case orange
+    case rose
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .blue:
+            return "Azul"
+        case .teal:
+            return "Verde azulado"
+        case .emerald:
+            return "Verde"
+        case .orange:
+            return "Naranja"
+        case .rose:
+            return "Rosa"
+        }
+    }
+
+    var tintColor: Color {
+        switch self {
+        case .blue:
+            return Color(red: 0.20, green: 0.58, blue: 0.86)
+        case .teal:
+            return Color(red: 0.18, green: 0.67, blue: 0.72)
+        case .emerald:
+            return Color(red: 0.18, green: 0.72, blue: 0.40)
+        case .orange:
+            return Color(red: 0.96, green: 0.58, blue: 0.18)
+        case .rose:
+            return Color(red: 0.90, green: 0.34, blue: 0.49)
+        }
+    }
 }
 
 struct AppUser: Codable, Identifiable, Equatable {
@@ -24,6 +113,8 @@ struct AppUser: Codable, Identifiable, Equatable {
     let email: String
     let fullName: String
     let phone: String?
+    let avatarUrl: String?
+    let bio: String?
     let role: UserRole
     let createdAt: String?
 
@@ -32,8 +123,19 @@ struct AppUser: Codable, Identifiable, Equatable {
         case email
         case fullName = "full_name"
         case phone
+        case avatarUrl = "avatar_url"
+        case bio
         case role
         case createdAt = "created_at"
+    }
+
+    var initials: String {
+        fullName
+            .split(separator: " ")
+            .prefix(2)
+            .map { String($0.prefix(1)) }
+            .joined()
+            .uppercased()
     }
 }
 
@@ -42,6 +144,8 @@ struct AppUserInsert: Encodable {
     let email: String
     let fullName: String
     let phone: String?
+    let avatarUrl: String?
+    let bio: String?
     let role: UserRole
 
     enum CodingKeys: String, CodingKey {
@@ -49,8 +153,28 @@ struct AppUserInsert: Encodable {
         case email
         case fullName = "full_name"
         case phone
+        case avatarUrl = "avatar_url"
+        case bio
         case role
     }
+}
+
+struct AppUserUpdate: Encodable {
+    let fullName: String
+    let phone: String?
+    let avatarUrl: String?
+    let bio: String?
+
+    enum CodingKeys: String, CodingKey {
+        case fullName = "full_name"
+        case phone
+        case avatarUrl = "avatar_url"
+        case bio
+    }
+}
+
+struct AppUserRoleUpdate: Encodable {
+    let role: UserRole
 }
 
 struct ListingFeatures: Codable, Equatable {
@@ -61,6 +185,7 @@ struct ListingFeatures: Codable, Equatable {
     var hasKitchen: Bool
     var hasWashingMachine: Bool
     var imageUrls: [String]
+    var tags: [String]
 
     init(
         hasWifi: Bool = false,
@@ -69,7 +194,8 @@ struct ListingFeatures: Codable, Equatable {
         isSharedBed: Bool = false,
         hasKitchen: Bool = false,
         hasWashingMachine: Bool = false,
-        imageUrls: [String] = []
+        imageUrls: [String] = [],
+        tags: [String] = []
     ) {
         self.hasWifi = hasWifi
         self.hasPrivateBathroom = hasPrivateBathroom
@@ -78,6 +204,7 @@ struct ListingFeatures: Codable, Equatable {
         self.hasKitchen = hasKitchen
         self.hasWashingMachine = hasWashingMachine
         self.imageUrls = imageUrls
+        self.tags = tags
     }
 
     enum CodingKeys: String, CodingKey {
@@ -88,6 +215,19 @@ struct ListingFeatures: Codable, Equatable {
         case hasKitchen = "has_kitchen"
         case hasWashingMachine = "has_washing_machine"
         case imageUrls = "image_urls"
+        case tags
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        hasWifi = try container.decodeIfPresent(Bool.self, forKey: .hasWifi) ?? false
+        hasPrivateBathroom = try container.decodeIfPresent(Bool.self, forKey: .hasPrivateBathroom) ?? false
+        hasSecurityCameras = try container.decodeIfPresent(Bool.self, forKey: .hasSecurityCameras) ?? false
+        isSharedBed = try container.decodeIfPresent(Bool.self, forKey: .isSharedBed) ?? false
+        hasKitchen = try container.decodeIfPresent(Bool.self, forKey: .hasKitchen) ?? false
+        hasWashingMachine = try container.decodeIfPresent(Bool.self, forKey: .hasWashingMachine) ?? false
+        imageUrls = try container.decodeIfPresent([String].self, forKey: .imageUrls) ?? []
+        tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
     }
 
     var enabledAmenities: [Amenity] {
@@ -140,6 +280,88 @@ struct Listing: Codable, Identifiable, Equatable {
         case isVerified = "is_verified"
         case isNew = "is_new"
         case features
+        case createdAt = "created_at"
+    }
+}
+
+extension ListingStatus {
+    var displayName: String {
+        switch self {
+        case .active:
+            return "Disponible"
+        case .inactive:
+            return "Oculto"
+        case .rented:
+            return "Rentado"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .active:
+            return "checkmark.circle.fill"
+        case .inactive:
+            return "eye.slash.fill"
+        case .rented:
+            return "key.fill"
+        }
+    }
+}
+
+extension Listing {
+    var imageUrls: [String] {
+        if !features.imageUrls.isEmpty {
+            return features.imageUrls
+        }
+
+        if let imageUrl {
+            return [imageUrl]
+        }
+
+        return []
+    }
+
+    var coverImageUrl: String? {
+        imageUrls.first
+    }
+
+    var galleryCount: Int {
+        imageUrls.count
+    }
+
+    var searchText: String {
+        [
+            title,
+            zone,
+            description ?? "",
+            features.tags.joined(separator: " "),
+            features.enabledAmenities.map(\.title).joined(separator: " ")
+        ]
+        .joined(separator: " ")
+        .lowercased()
+    }
+
+    var priceText: String {
+        String(format: "S/ %.0f / mes", price)
+    }
+
+    var isAvailable: Bool {
+        status == .active
+    }
+}
+
+struct ListingImage: Codable, Identifiable, Equatable {
+    let id: String
+    let listingId: String
+    let url: String
+    let position: Int
+    let createdAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case listingId = "listing_id"
+        case url
+        case position
         case createdAt = "created_at"
     }
 }
